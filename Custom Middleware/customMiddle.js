@@ -1,7 +1,7 @@
 const upload = require('../upload/multer');
 
 const fileChecker = (req, res, next) => {
-    console.log(req.files)
+    console.log(req.body)
     if (req.files && req.files.length === 1) {
         return upload.single('file')(req, res, next);
     } else if (Array.isArray(req.files)) {

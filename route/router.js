@@ -1,13 +1,28 @@
-const express = require('express')
- const router = express.Router()
+const express = require('express');
+const router = express.Router();
+const Busboy = require('busboy');
+const fs = require('fs');
 const fileChecker = require('../Custom Middleware/customMiddle');
-const filesController=require('../Controler/controller')
 
+router.post('/', (req, res, next) => {
+    const busboy = new Busboy({ headers: req.headers });
 
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+        req.body[fieldname] = filename;
+        const saveTo = 'uploads/' + filename;
+        file.pipe(fs.createWriteStream(saveTo));
+    });
 
- router.post('/',fileChecker,filesController)
+    busboy.on('field', (fieldname, val) => {
+        req.body[fieldname] = val;
+    });
 
+    busboy.on('finish', () => {
+        console.log('Parsing finished.');
+        fileChecker(req, res, next);
+    });
 
+    req.pipe(busboy);
+});
 
-
-    module.exports=router;
+module.exports = router;
